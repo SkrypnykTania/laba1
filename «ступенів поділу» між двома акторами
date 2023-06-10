@@ -1,0 +1,46 @@
+import imdb
+
+def get_degrees_of_separation(actor1_name, actor2_name):
+  
+    ia = imdb.IMDb()
+
+    actor1 = ia.search_person(actor1_name)[0]
+    ia.update(actor1)
+
+    actor2 = ia.search_person(actor2_name)[0]
+    ia.update(actor2)
+
+   
+    queue = [(actor1, 0)]
+    visited = set()
+    
+    while queue:
+        current_actor, degree = queue.pop(0)
+        if current_actor == actor2:
+            return degree
+        
+        if current_actor.getID() not in visited:
+            visited.add(current_actor.getID())
+            
+            filmography = current_actor.get('filmography')
+            
+          
+            for movie in filmography:
+                if movie.get('kind') == 'actor':
+                    cast = movie.get('cast')
+                    for actor in cast:
+                        if actor.getID() not in visited:
+                            queue.append((actor, degree + 1))
+    
+  
+    return -1
+
+if __name__ == '__main__':
+    actor1_name = "Emma Watson"
+    actor2_name = "Jennifer Lawrence"
+    degrees = get_degrees_of_separation(actor1_name, actor2_name)
+
+    if degrees == -1:
+        print(f"No connection found between {actor1_name} and {actor2_name}")
+    else:
+        print(f"{degrees} degrees of separation.")
